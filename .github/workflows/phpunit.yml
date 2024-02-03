@@ -18,3 +18,7 @@ jobs:
           cp src/.env.example src/.env
           docker-compose exec -T app composer install
           docker-compose exec -T app php artisan key:generate
+
+        - name: 'PHPUnitのテスト実行'
+        run: |
+          docker-compose exec -T app vendor/bin/phpunit
