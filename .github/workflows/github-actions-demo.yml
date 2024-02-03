@@ -1,18 +1,20 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: PHPUnitの実行
+on: [ push ]
 jobs:
-  Explore-GitHub-Actions:
+  phpunit:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: '環境の起動とテスト'
+        run: | 
+          docker-compose up -d
+          while ! docker-compose exec -T db mysqladmin ping --host=127.0.0.1 --user=laravel --password=password --silent; do
+            echo "mysqlの起動を待っています"
+            sleep 1
+          done
+          cp src/.env.example src/.env
+          docker-compose exec -T app composer install
+          docker-compose exec -T app php artisan key:generate
